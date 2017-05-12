@@ -1,6 +1,6 @@
 # walkleys-scholar-syd-01-project
 
-## User Stories
+## (Week 2) User Stories
 ### Key user stories
 ### Data to store
 - A participant can register their name, age, ethnicity, gender, interests, occupation, availability, location (state, suburb, postcode), contact details and photo so they can be identified by a client.
@@ -47,3 +47,32 @@
 #### Key functions (blacklisting)
 - A participant can be blacklisted if they do not attend multiple events.
 - A participant can be blacklisted if a client reports a participant for bad behaviour.
+
+## (Week 3) Models, Generators and Scaffolds
+- The instructions we used to build the generators and scaffolds
+
+<pre>
+rails new rent_a_crowd
+</pre>
+
+- Add following line to Gemfile
+
+<pre>
+gem 'devise'
+</pre>
+
+- Install devise https://github.com/plataformatec/devise#getting-started
+  - Add "gem 'devise'" to Gemfile
+
+<pre>
+bundle install
+rails generate devise:install
+</pre>
+
+  - Add following line to config/environments/development.rb
+
+<pre>
+config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+</pre>
+
+  - 
