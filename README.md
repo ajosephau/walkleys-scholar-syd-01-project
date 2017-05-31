@@ -187,14 +187,19 @@ config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
       </pre>
 
   - Setup other classes
+      <pre>
       rails generate scaffold Event name:string num_participants:integer start_time:datetime finish_time:datetime address:text instructions:text demographic:text publication_details:text monetary_compensation:decimal other_compensation:text publicly_viewable:boolean client:references
-
       rails generate scaffold Invitation event:references participant:references accepted:boolean
+      </pre>
 
    - for each "references" in scaffold, change the last parameter in each f.collection_select to some meaningful parameter (in this example, it's changing a reference to a user who owns multiple accounts in a system.)
 
      - Replace form control for selecting users in accounts (/app/views/-insert-model-name-/_form.html.erb)
+        <pre>
         <%= f.collection_select(:user_id, User.all, :id, :email ) %>
+        </pre>
 
      - Replace form control for displaying users in accounts (/app/views/-insert-model-name-/show.html.erb and /app/views/accounts/index.html.erb )
-         <dd><%= @account.user.email %></dd>
+        <pre>
+        <dd><%= @account.user.email %></dd>
+        </pre>
