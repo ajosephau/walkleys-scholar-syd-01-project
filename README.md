@@ -52,17 +52,25 @@
 - The instructions we used to build the generators and scaffolds
 
 <pre>
-rails new rent_a_crowd
+rails new mustr
+</pre>
+
+- Create a landing page, and a dashboard page
+
+<pre>
+rails generate controller home index
+rails generate controller dashboard index
 </pre>
 
 - Add following line to Gemfile
 
 <pre>
+# Using devise for login
 gem 'devise'
 </pre>
 
 - Install devise https://github.com/plataformatec/devise#getting-started
-  - Add "gem 'devise'" to Gemfile
+  - Setup devise
 
 <pre>
 bundle install
@@ -72,7 +80,121 @@ rails generate devise:install
   - Add following line to config/environments/development.rb
 
 <pre>
+# setup mailer
 config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 </pre>
 
-  - 
+  - Add a route to the home page created in "config/routes.rb"
+
+  <pre>
+  root to: "home#index"
+  </pre>
+
+  - Add messages to the app/views/layouts/application.html.erb
+
+  <pre>
+    <p class="notice"><%= notice %></p>
+    <p class="alert"><%= alert %></p>
+  </pre>
+
+  - Generate Devise views
+
+  <pre>
+  rails g devise:views
+  </pre>
+
+  - Setup Devise user Model
+
+  <pre>
+  rails generate devise User
+  rake db:migrate
+  </pre>
+
+  - Setup user models
+    - Run following commands:
+      <pre>
+        rails generate model Admin
+        rails generate model Client
+        rails generate model Participant
+      </pre>
+    - Change the models to inherit from users, like in app/models/admin.rb
+      <pre>
+      class Admin < User
+      end
+      </pre>
+
+      - Add following line to app/controllers/dashboard_controller.rb
+      <pre>
+        before_action :authenticate_user!
+      </pre>
+
+      <pre>
+      class DashboardController < ApplicationController
+        before_action :authenticate_user!
+        def index
+        end
+      end
+      </pre>
+
+      - Set Devise scoped views to true so can have different views for users (in config/initializers/devise.rb)
+
+      config.scoped_views = true
+
+      - In config/routes.rb, change the devise_for from :users to other user types
+
+      devise_for :admins
+      devise_for :participants
+      devise_for :clients
+
+      - Add logout button to application.html.erb file
+
+      <pre>
+      <% if !admin_signed_in? %>
+          <%= link_to 'Admin log in', new_admin_session_path %>
+      <% end %>
+      <% if !participant_signed_in? %>
+          <%= link_to 'Participant log in', new_participant_session_path %>
+      <% end %>
+      <% if !client_signed_in? %>
+          <%= link_to 'Client log in', new_client_session_path %>
+      <% end %>
+      <% if admin_signed_in? %>
+          <%= link_to 'Admin log out', destroy_admin_session_path, method: :delete %>
+      <% end %>
+      <% if client_signed_in? %>
+          <%= link_to 'Client log out', destroy_client_session_path, method: :delete %>
+      <% end %>
+      <% if participant_signed_in? %>
+          <%= link_to 'Participant log out', destroy_participant_session_path, method: :delete %>
+      <% end %>
+      </pre>
+
+      - Add devise group to application controller so we can use current_user and user_signed_in? functions
+      <pre>
+      devise_group :user, contains: [:admin, :client, :participant]
+      </pre>
+
+      - Add fields to user models
+
+      <pre>
+      rails generate migration add_credit_balance_to_clients credit_balance:int
+      rails generate migration add_credit_rate_to_clients credit_rate:decimal
+
+      rails generate migration add_name_to_participants name:string
+      rails generate migration add_ethnicity_to_participants ethnicity:string
+      rails generate migration add_gender_to_participants gender:string
+      rake db:migrate
+      </pre>
+
+  - Setup other classes
+      rails generate scaffold Event name:string num_participants:integer start_time:datetime finish_time:datetime address:text instructions:text demographic:text publication_details:text monetary_compensation:decimal other_compensation:text publicly_viewable:boolean client:references
+
+      rails generate scaffold Invitation event:references participant:references accepted:boolean
+
+   - for each "references" in scaffold, change the last parameter in each f.collection_select to some meaningful parameter (in this example, it's changing a reference to a user who owns multiple accounts in a system.)
+
+     - Replace form control for selecting users in accounts (/app/views/-insert-model-name-/_form.html.erb)
+        <%= f.collection_select(:user_id, User.all, :id, :email ) %>
+
+     - Replace form control for displaying users in accounts (/app/views/-insert-model-name-/show.html.erb and /app/views/accounts/index.html.erb )
+         <dd><%= @account.user.email %></dd>
